@@ -21,29 +21,63 @@ const sourceColors: Record<string, string> = {
 
 interface ClueCardProps {
   clue: Clue
+  initialVotedAs?: 'real' | 'stretch' | null
 }
 
-export function ClueCard({ clue }: ClueCardProps) {
+export function ClueCard({ clue, initialVotedAs = null }: ClueCardProps) {
   const [votes, setVotes] = useState({
     real: clue.voteCountReal,
     stretch: clue.voteCountStretch,
   })
-  const [voted, setVoted] = useState<'real' | 'stretch' | null>(null)
+  const [confidencePct, setConfidencePct] = useState(clue.confidencePct)
+  const [voted, setVoted] = useState<'real' | 'stretch' | null>(initialVotedAs)
+  const [loading, setLoading] = useState(false)
 
   const total = votes.real + votes.stretch
-  const pct = total > 0 ? Math.round((votes.real / total) * 100) : clue.confidencePct
+  const pct = confidencePct
 
-  const handleVote = (type: 'real' | 'stretch', e: React.MouseEvent) => {
+  const handleVote = async (type: 'real' | 'stretch', e: React.MouseEvent) => {
     e.preventDefault()
-    if (voted) return
+    if (voted || loading) return
+
+    const prev = { votes: { ...votes }, confidencePct, voted }
+    const newVotes = { ...votes, [type]: votes[type] + 1 }
+    const newTotal = newVotes.real + newVotes.stretch
+    const newPct = newTotal > 0 ? Math.round((newVotes.real / newTotal) * 100) : 50
+    setVotes(newVotes)
+    setConfidencePct(newPct)
     setVoted(type)
-    setVotes(prev => ({ ...prev, [type]: prev[type] + 1 }))
+    setLoading(true)
+
+    try {
+      const res = await fetch('/api/vote', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clue_id: clue.id, type }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        if (data.confidencePct !== undefined) {
+          setConfidencePct(data.confidencePct)
+          setVotes({ real: data.voteCountReal, stretch: data.voteCountStretch })
+        }
+      } else {
+        setVotes(prev.votes)
+        setConfidencePct(prev.confidencePct)
+        setVoted(prev.voted)
+      }
+    } catch {
+      setVotes(prev.votes)
+      setConfidencePct(prev.confidencePct)
+      setVoted(prev.voted)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
     <div className="border border-zinc-200 dark:border-zinc-800 rounded-xl bg-white dark:bg-zinc-900 hover:border-[#AFA9EC] dark:hover:border-[#7F77DD] transition-colors">
       <Link href={`/clue/${clue.id}`} className="block p-4">
-        {/* Top row */}
         <div className="flex items-start justify-between gap-2 mb-3">
           <div className="flex flex-wrap items-center gap-1.5 min-w-0">
             <StatusBadge status={clue.status} />
@@ -64,24 +98,19 @@ export function ClueCard({ clue }: ClueCardProps) {
             {clue.sourceName}
           </span>
         </div>
-
-        {/* Clue text */}
         <p className="text-sm text-zinc-800 dark:text-zinc-200 leading-relaxed mb-3 line-clamp-3">
           {clue.text}
         </p>
-
-        {/* Confidence bar */}
         <ConfidenceBar pct={pct} />
       </Link>
 
-      {/* Vote row — outside the link to avoid nested interactivity */}
       <div className="px-4 pb-4 flex items-center justify-between gap-2">
         <div className="flex gap-2">
           <Button
             variant="outline"
             size="sm"
             onClick={e => handleVote('real', e)}
-            disabled={!!voted}
+            disabled={!!voted || loading}
             className={
               voted === 'real'
                 ? 'border-[#7F77DD] text-[#7F77DD] dark:border-[#7F77DD] dark:text-[#7F77DD]'
@@ -95,7 +124,7 @@ export function ClueCard({ clue }: ClueCardProps) {
             variant="outline"
             size="sm"
             onClick={e => handleVote('stretch', e)}
-            disabled={!!voted}
+            disabled={!!voted || loading}
             className={
               voted === 'stretch'
                 ? 'border-zinc-400 text-zinc-500 dark:border-zinc-500'

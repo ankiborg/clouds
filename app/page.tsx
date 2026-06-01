@@ -1,24 +1,21 @@
 import Link from 'next/link'
-import { mysteries, clues } from '@/lib/mock-data'
-import { AgentBriefing } from '@/components/AgentBriefing'
-import { ClueCard } from '@/components/ClueCard'
-import { daysUntil, formatDate } from '@/lib/date'
-import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
+import { getActiveMystery, getRecentCluesByMystery } from '@/lib/supabase/queries'
+import { AgentBriefing } from '@/components/AgentBriefing'
+import { LiveFeed } from '@/components/LiveFeed'
+import { Button } from '@/components/ui/button'
+import { daysUntil, formatDate } from '@/lib/date'
 
-export default function HomePage() {
-  const activeMystery = mysteries.find(m => m.status === 'active')
-  const feedClues = clues
-    .filter(c => c.mysteryId === activeMystery?.id)
-    .sort((a, b) => b.spottedAt.getTime() - a.spottedAt.getTime())
+export default async function HomePage() {
+  const activeMystery = await getActiveMystery()
+  const feedClues = activeMystery
+    ? await getRecentCluesByMystery(activeMystery.id)
+    : []
 
-  const daysLeft = activeMystery?.resolvesAt
-    ? daysUntil(activeMystery.resolvesAt)
-    : null
+  const daysLeft = activeMystery?.resolvesAt ? daysUntil(activeMystery.resolvesAt) : null
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8 pb-24">
-      {/* Active mystery banner */}
       {activeMystery && (
         <Link href={`/mystery/${activeMystery.id}`} className="block mb-6">
           <div className="border border-zinc-200 dark:border-zinc-800 rounded-xl p-5 hover:border-[#AFA9EC] dark:hover:border-[#7F77DD] transition-colors bg-white dark:bg-zinc-900">
@@ -47,7 +44,6 @@ export default function HomePage() {
                 </div>
               )}
             </div>
-
             <div className="mt-4 flex flex-wrap gap-4 text-sm text-zinc-500 dark:text-zinc-400 border-t border-zinc-100 dark:border-zinc-800 pt-4">
               <span>
                 <span className="font-medium text-zinc-700 dark:text-zinc-300">
@@ -74,14 +70,12 @@ export default function HomePage() {
         </Link>
       )}
 
-      {/* Agent briefing */}
       {activeMystery && (
         <div className="mb-8">
           <AgentBriefing text={activeMystery.agentBriefing} />
         </div>
       )}
 
-      {/* Feed header */}
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
           Latest Clues
@@ -91,14 +85,14 @@ export default function HomePage() {
         </span>
       </div>
 
-      {/* Clue feed */}
-      <div className="space-y-3">
-        {feedClues.map(clue => (
-          <ClueCard key={clue.id} clue={clue} />
-        ))}
-      </div>
+      {activeMystery ? (
+        <LiveFeed initialClues={feedClues} mysteryId={activeMystery.id} />
+      ) : (
+        <p className="text-sm text-zinc-400 dark:text-zinc-500 text-center py-8">
+          No active mystery right now.
+        </p>
+      )}
 
-      {/* Floating submit button */}
       <div className="fixed bottom-6 right-6 z-40">
         <Button
           render={<Link href="/submit" />}
