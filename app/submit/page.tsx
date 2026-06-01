@@ -55,7 +55,7 @@ export default function SubmitPage() {
         </h2>
         <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-6 max-w-sm mx-auto">
           An agent will verify your clue and add it to the feed if it checks out.
-          You'll be notified either way.
+          You&apos;ll be notified either way.
         </p>
         <div className="flex gap-3 justify-center">
           <Button
@@ -217,7 +217,7 @@ export default function SubmitPage() {
       {/* Explainer */}
       <p className="mt-6 text-xs text-zinc-400 dark:text-zinc-500 leading-relaxed text-center">
         An agent will verify your clue and add it to the feed if it checks out.
-        You'll be notified either way.
+        You&apos;ll be notified either way.
       </p>
     </div>
   )

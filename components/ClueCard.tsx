@@ -33,7 +33,6 @@ export function ClueCard({ clue, initialVotedAs = null }: ClueCardProps) {
   const [voted, setVoted] = useState<'real' | 'stretch' | null>(initialVotedAs)
   const [loading, setLoading] = useState(false)
 
-  const total = votes.real + votes.stretch
   const pct = confidencePct
 
   const handleVote = async (type: 'real' | 'stretch', e: React.MouseEvent) => {
