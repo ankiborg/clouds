@@ -102,6 +102,7 @@ export default function HomePage() {
       <div className="fixed bottom-6 right-6 z-40">
         <Button
           render={<Link href="/submit" />}
+          nativeButton={false}
           size="lg"
           className="bg-[#7F77DD] hover:bg-[#6b63c8] text-white rounded-full border-0 gap-2 shadow-lg"
         >

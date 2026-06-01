@@ -70,7 +70,7 @@ export default function SubmitPage() {
           >
             Submit another
           </Button>
-          <Button render={<Link href="/" />} className="bg-[#7F77DD] hover:bg-[#6b63c8] text-white border-0">
+          <Button render={<Link href="/" />} nativeButton={false} className="bg-[#7F77DD] hover:bg-[#6b63c8] text-white border-0">
             Back to feed
           </Button>
         </div>
