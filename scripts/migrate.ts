@@ -1,3 +1,5 @@
+process.loadEnvFile('.env.local')
+
 import { Client } from 'pg'
 import { readFileSync } from 'fs'
 import { join } from 'path'

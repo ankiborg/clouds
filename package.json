@@ -7,8 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "db:migrate": "node --env-file=.env.local ./node_modules/.bin/tsx scripts/migrate.ts",
-    "agents:run": "node --env-file=.env.local ./node_modules/.bin/tsx scripts/run-agents.ts"
+    "db:migrate": "npx tsx scripts/migrate.ts",
+    "agents:run": "npx tsx scripts/run-agents.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.100.1",

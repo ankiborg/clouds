@@ -1,3 +1,5 @@
+process.loadEnvFile('.env.local')
+
 import { runHarvestingAgent } from '../lib/agents/harvesting-agent'
 import { runClassificationAgent } from '../lib/agents/classification-agent'
 
