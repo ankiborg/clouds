@@ -7,7 +7,7 @@ import { Header } from '@/components/Header'
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' })
 
 export const metadata: Metadata = {
-  title: 'SwiftWatch — Taylor Swift Easter Egg Tracker',
+  title: 'SwiftWatch — Taylor Swift Easter Egg & Hidden Message Tracker',
   description:
     'AI-powered tracker for Taylor Swift easter eggs and hidden messages. Follow active mysteries, vote on clues, and explore the lore archive.',
 }
