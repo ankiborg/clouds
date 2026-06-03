@@ -33,7 +33,7 @@ async function urlAlreadySeen(supabase: SupabaseClient, url: string): Promise<bo
 }
 
 async function writeRawEvent(
-  supabase: SupabaseClient,
+  _supabase: SupabaseClient,
   event: {
     source_type: string
     source_url?: string
@@ -42,9 +42,23 @@ async function writeRawEvent(
     spotted_at: string
   }
 ): Promise<boolean> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await supabase.from('raw_events').insert(event as any)
-  if (error) { logger.harvest(`Failed to write raw_event: ${error.message}`); return false }
+  const url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/raw_events`
+  logger.harvest(`POST ${url}`)
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'apikey': process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY!}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=minimal',
+    },
+    body: JSON.stringify(event),
+  })
+  if (!res.ok) {
+    const text = await res.text()
+    logger.harvest(`Failed to write raw_event: ${res.status} ${text}`)
+    return false
+  }
   return true
 }
 
@@ -65,7 +79,7 @@ async function harvestReddit(supabase: SupabaseClient) {
     try {
       const res = await fetch(`https://www.reddit.com/r/${sub}/new.json?limit=25`, {
         headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
           'Accept': 'application/json',
         },
       })
@@ -209,6 +223,14 @@ export async function runHarvestingAgent(): Promise<void> {
   }
 
   logger.harvest('Starting harvest run')
+  const testUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/mysteries?select=id&limit=1`
+  const testRes = await fetch(testUrl, {
+    headers: {
+      'apikey': process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY!}`,
+    },
+  })
+  logger.harvest(`Connectivity check (mysteries): ${testRes.status}`)
   const supabase = getServiceClient()
 
   await harvestReddit(supabase)
