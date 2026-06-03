@@ -8,7 +8,7 @@ import type { Clue } from '@/types'
 
 interface Props {
   initialClues: Clue[]
-  mysteryId: string
+  mysteryId?: string
 }
 
 export function LiveFeed({ initialClues, mysteryId }: Props) {
@@ -25,7 +25,7 @@ export function LiveFeed({ initialClues, mysteryId }: Props) {
           event: 'INSERT',
           schema: 'public',
           table: 'clues',
-          filter: `mystery_id=eq.${mysteryId}`,
+          ...(mysteryId ? { filter: `mystery_id=eq.${mysteryId}` } : {}),
         },
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (payload: { new: Record<string, any> }) => {

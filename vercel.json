@@ -1,3 +1,1 @@
-{
-    "framework": "nextjs"
-}
+{"crons":[{"path":"/api/agents/harvest","schedule":"*/30 * * * *"}]}

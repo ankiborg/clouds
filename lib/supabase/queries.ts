@@ -127,6 +127,41 @@ export async function getVoteForClue(
   return data.type as 'real' | 'stretch'
 }
 
+export async function getRecentClues(limit = 50): Promise<Clue[]> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('clues')
+    .select('*')
+    .order('spotted_at', { ascending: false })
+    .limit(limit)
+  if (error || !data) return []
+  return data.map(mapClue)
+}
+
+export async function getPatternClusters(): Promise<{ count: number }> {
+  const supabase = createClient()
+
+  const { data: connections } = await supabase.from('connections').select('clue_id_a, clue_id_b')
+  if (!connections || connections.length === 0) return { count: 0 }
+
+  const { data: unlinkedClues } = await supabase
+    .from('clues')
+    .select('id')
+    .is('mystery_id', null)
+  if (!unlinkedClues || unlinkedClues.length === 0) return { count: 0 }
+
+  const unlinkedIds = new Set(unlinkedClues.map(c => c.id))
+  const connectionCounts = new Map<string, number>()
+  for (const conn of connections) {
+    if (unlinkedIds.has(conn.clue_id_a)) connectionCounts.set(conn.clue_id_a, (connectionCounts.get(conn.clue_id_a) ?? 0) + 1)
+    if (unlinkedIds.has(conn.clue_id_b)) connectionCounts.set(conn.clue_id_b, (connectionCounts.get(conn.clue_id_b) ?? 0) + 1)
+  }
+
+  let count = 0
+  connectionCounts.forEach(n => { if (n >= 2) count++ })
+  return { count }
+}
+
 export async function recordVote(
   clueId: string,
   type: 'real' | 'stretch',

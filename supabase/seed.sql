@@ -38,6 +38,10 @@ values
     'The clues originated from a fan-made concept project that went viral. Taylor''s team confirmed no feature film is in production.'
   );
 
+-- Toy Story 5 mystery: resolved confirmed on premiere date
+update mysteries
+  set status = 'resolved', resolution_outcome = 'confirmed', resolved_at = '2026-06-19'
+  where id = '10000000-0000-0000-0000-000000000001';
 update mysteries set resolved_at = '2026-02-05', resolution_outcome = 'confirmed'
   where id = '10000000-0000-0000-0000-000000000002';
 update mysteries set resolved_at = '2025-11-15', resolution_outcome = 'debunked'
@@ -172,8 +176,9 @@ values
   ('Taylor Nation', 'Taylor Swift''s official fan-engagement team, known for running cryptic online activations, sending gifts to selected fans, and dropping hints ahead of major announcements. Operates the Taylor Nation LLC imprint.'),
   ('ISRC', 'International Standard Recording Code — a unique identifier permanently embedded in a recorded track. Fans track ISRC registrations to spot unreleased songs before they''re officially announced, since ISRCs must be registered with collecting societies before distribution.');
 
--- Patterns
+-- Patterns (includes lore entry for resolved Toy Story mystery)
 insert into patterns (text)
 values
   ('Taylor Swift announcements are consistently preceded by streaming-metadata anomalies on the 13th of the month. Across the last four album cycles, at least one ISRC registration or playlist edit linked to an unreleased project appeared on a 13th date between 3 and 6 weeks before the official announcement.'),
-  ('Physical-world sightings (venue appearances, merchandise changes, third-party collaborator meetings) lag behind digital signals by 2–6 weeks. This suggests Taylor''s team seeds digital breadcrumbs first, then allows in-person corroboration to surface organically through fan reporting.');
+  ('Physical-world sightings (venue appearances, merchandise changes, third-party collaborator meetings) lag behind digital signals by 2–6 weeks. This suggests Taylor''s team seeds digital breadcrumbs first, then allows in-person corroboration to surface organically through fan reporting.'),
+  ('RESOLVED — Taylor Swift × Toy Story 5: Confirmed on June 19, 2026, the Toy Story 5 premiere date. Taylor co-wrote and performed "You''ve Got a Friend in Me (Taylor''s Version)" for the film''s end credits. The ISRC metadata anomaly spotted on May 13 was the earliest verifiable signal — 37 days before the official announcement.');

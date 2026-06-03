@@ -5,9 +5,11 @@ export const mysteries: Mystery[] = [
     id: 'mystery-ts5',
     name: 'Taylor Swift × Toy Story 5',
     subtitle: 'Is Taylor lending her voice — or a song — to Pixar\'s most anticipated sequel?',
-    status: 'active',
+    status: 'resolved',
     openedAt: new Date('2026-04-01'),
     resolvesAt: new Date('2026-06-19'),
+    resolvedAt: new Date('2026-06-19'),
+    resolutionOutcome: 'confirmed' as const,
     clueCount: 6,
     voteCount: 1982,
     agentBriefing:

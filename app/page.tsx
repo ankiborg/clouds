@@ -1,16 +1,17 @@
 import Link from 'next/link'
 import { Plus } from 'lucide-react'
-import { getActiveMystery, getRecentCluesByMystery } from '@/lib/supabase/queries'
+import { getActiveMystery, getRecentClues, getPatternClusters } from '@/lib/supabase/queries'
 import { AgentBriefing } from '@/components/AgentBriefing'
 import { LiveFeed } from '@/components/LiveFeed'
 import { Button } from '@/components/ui/button'
 import { daysUntil, formatDate } from '@/lib/date'
 
 export default async function HomePage() {
-  const activeMystery = await getActiveMystery()
-  const feedClues = activeMystery
-    ? await getRecentCluesByMystery(activeMystery.id)
-    : []
+  const [activeMystery, feedClues, patternClusters] = await Promise.all([
+    getActiveMystery(),
+    getRecentClues(50),
+    getPatternClusters(),
+  ])
 
   const daysLeft = activeMystery?.resolvesAt ? daysUntil(activeMystery.resolvesAt) : null
 
@@ -70,9 +71,25 @@ export default async function HomePage() {
         </Link>
       )}
 
-      {activeMystery && (
+      {activeMystery?.agentBriefing && (
         <div className="mb-8">
           <AgentBriefing text={activeMystery.agentBriefing} />
+        </div>
+      )}
+
+      {patternClusters.count > 0 && (
+        <div className="mb-8">
+          <div className="border-l-4 border-amber-400 bg-zinc-50 dark:bg-zinc-900/50 rounded-r-xl px-4 py-3">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="h-2 w-2 rounded-full bg-amber-400 shrink-0" />
+              <span className="text-xs font-semibold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                Patterns emerging
+              </span>
+            </div>
+            <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+              {patternClusters.count} unlinked {patternClusters.count === 1 ? 'clue shares connections' : 'clues share connections'} — no mystery assigned yet.
+            </p>
+          </div>
         </div>
       )}
 
@@ -85,11 +102,11 @@ export default async function HomePage() {
         </span>
       </div>
 
-      {activeMystery ? (
-        <LiveFeed initialClues={feedClues} mysteryId={activeMystery.id} />
+      {feedClues.length > 0 ? (
+        <LiveFeed initialClues={feedClues} />
       ) : (
         <p className="text-sm text-zinc-400 dark:text-zinc-500 text-center py-8">
-          No active mystery right now.
+          No clues yet.
         </p>
       )}
 
