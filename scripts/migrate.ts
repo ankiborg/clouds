@@ -1,4 +1,5 @@
-process.loadEnvFile('.env.local')
+import * as dotenv from 'dotenv'
+dotenv.config({ path: '.env.local' })
 
 import { Client } from 'pg'
 import { readFileSync } from 'fs'

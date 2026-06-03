@@ -42,9 +42,7 @@ async function writeRawEvent(
     spotted_at: string
   }
 ): Promise<boolean> {
-  const url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/raw_events`
-  logger.harvest(`POST ${url}`)
-  const res = await fetch(url, {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/raw_events`, {
     method: 'POST',
     headers: {
       'apikey': process.env.SUPABASE_SERVICE_ROLE_KEY!,
@@ -223,14 +221,6 @@ export async function runHarvestingAgent(): Promise<void> {
   }
 
   logger.harvest('Starting harvest run')
-  const testUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/mysteries?select=id&limit=1`
-  const testRes = await fetch(testUrl, {
-    headers: {
-      'apikey': process.env.SUPABASE_SERVICE_ROLE_KEY!,
-      'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY!}`,
-    },
-  })
-  logger.harvest(`Connectivity check (mysteries): ${testRes.status}`)
   const supabase = getServiceClient()
 
   await harvestReddit(supabase)
