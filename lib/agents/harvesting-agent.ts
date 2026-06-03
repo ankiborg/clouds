@@ -41,10 +41,11 @@ async function writeRawEvent(
     raw_metadata?: Record<string, unknown>
     spotted_at: string
   }
-) {
+): Promise<boolean> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error } = await supabase.from('raw_events').insert(event as any)
-  if (error) logger.harvest(`Failed to write raw_event: ${error.message}`)
+  if (error) { logger.harvest(`Failed to write raw_event: ${error.message}`); return false }
+  return true
 }
 
 async function getAgentState(supabase: SupabaseClient, key: string): Promise<string | null> {
@@ -63,7 +64,10 @@ async function harvestReddit(supabase: SupabaseClient) {
   for (const sub of subreddits) {
     try {
       const res = await fetch(`https://www.reddit.com/r/${sub}/new.json?limit=25`, {
-        headers: { 'User-Agent': 'SwiftWatch/1.0 (taylor swift easter egg tracker)' },
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'application/json',
+        },
       })
       if (!res.ok) {
         logger.harvest(`Reddit ${sub}: HTTP ${res.status}`)
@@ -107,13 +111,13 @@ async function harvestTaylorSwiftCom(supabase: SupabaseClient) {
     if (hash === prevHash) { logger.harvest('taylorswift.com: no change'); return }
 
     await setAgentState(supabase, 'ts_com_hash', hash)
-    await writeRawEvent(supabase, {
+    const ok = await writeRawEvent(supabase, {
       source_type: 'taylorswift_com',
       source_url: 'https://www.taylorswift.com',
       raw_content: text.slice(0, 4000),
       spotted_at: new Date().toISOString(),
     })
-    logger.harvest('taylorswift.com: change detected, raw_event written')
+    if (ok) logger.harvest('taylorswift.com: change detected, raw_event written')
   } catch (err) {
     logger.harvest(`taylorswift.com error: ${err}`)
   }
@@ -154,12 +158,12 @@ async function harvestSpotify(supabase: SupabaseClient) {
     if (hash === prevHash) { logger.harvest('Spotify: no change'); return }
 
     await setAgentState(supabase, 'spotify_hash', hash)
-    await writeRawEvent(supabase, {
+    const ok = await writeRawEvent(supabase, {
       source_type: 'spotify',
       raw_content: JSON.stringify(albumsJson).slice(0, 4000),
       spotted_at: new Date().toISOString(),
     })
-    logger.harvest('Spotify: change detected, raw_event written')
+    if (ok) logger.harvest('Spotify: change detected, raw_event written')
   } catch (err) {
     logger.harvest(`Spotify error: ${err}`)
   }
@@ -199,6 +203,11 @@ async function harvestFanBlogs(supabase: SupabaseClient) {
 // X harvesting deferred to v2 (paid API required)
 
 export async function runHarvestingAgent(): Promise<void> {
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    logger.harvest('ERROR: SUPABASE_SERVICE_ROLE_KEY is not set — cannot write to database')
+    return
+  }
+
   logger.harvest('Starting harvest run')
   const supabase = getServiceClient()
 
@@ -207,13 +216,5 @@ export async function runHarvestingAgent(): Promise<void> {
   await harvestSpotify(supabase)
   await harvestFanBlogs(supabase)
 
-  logger.harvest('Harvest complete — triggering classification')
-  try {
-    const baseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-      ? `https://${process.env.VERCEL_URL ?? 'localhost:3000'}`
-      : 'http://localhost:3000'
-    await fetch(`${baseUrl}/api/agents/classify`, { method: 'POST' })
-  } catch (err) {
-    logger.harvest(`Failed to trigger classify: ${err}`)
-  }
+  logger.harvest('Harvest complete')
 }
