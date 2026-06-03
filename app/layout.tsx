@@ -9,7 +9,7 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-sans' })
 export const metadata: Metadata = {
   title: 'SwiftWatch — Taylor Swift Easter Egg Tracker',
   description:
-    'AI-powered tracker for Taylor Swift easter eggs. Follow active mysteries, vote on clues, and explore the lore archive.',
+    'AI-powered tracker for Taylor Swift easter eggs and hidden messages. Follow active mysteries, vote on clues, and explore the lore archive.',
 }
 
 export default function RootLayout({
