@@ -16,3 +16,7 @@ create table if not exists agent_state (
   value text,
   updated_at timestamptz default now()
 );
+
+-- PostgREST requires grants to anon/authenticated to register tables as routes
+grant select, insert on raw_events to anon, authenticated;
+grant select, insert, update on agent_state to anon, authenticated;
