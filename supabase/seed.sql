@@ -13,7 +13,7 @@ values
     '2026-06-19',
     6,
     1982,
-    'Three independent data streams are converging on the same conclusion: Taylor Swift has a creative role in Toy Story 5. A streaming-metadata anomaly on Disney+ lists an uncredited "Track 13" with an ISRC registered to Taylor Nation LLC — Taylor''s own fan-engagement imprint. Cross-referencing with a verified sighting at the Academy Governors Ball (where Taylor was photographed alongside Pixar CCO Pete Docter) and a single-frame clapperboard reading "T.S.5" in the Eras Tour film re-release, this agent rates the probability of a formal collaboration at 74% and rising. Resolution is expected by the June 19 premiere date.'
+    'Confirmed: Taylor Swift wrote and performed "Beyond the Clouds" for Toy Story 5, officially announced May 14 2026. The number-13 clues, cloud imagery, and streaming metadata changes were all genuine signals. This mystery closes as fully corroborated — one of the cleaner resolutions in SwiftWatch history.'
   ),
   (
     '10000000-0000-0000-0000-000000000002',
@@ -38,9 +38,9 @@ values
     'The clues originated from a fan-made concept project that went viral. Taylor''s team confirmed no feature film is in production.'
   );
 
--- Toy Story 5 mystery: resolved confirmed on premiere date
+-- Toy Story 5 mystery: resolved confirmed on announcement date
 update mysteries
-  set status = 'resolved', resolution_outcome = 'confirmed', resolved_at = '2026-06-19'
+  set status = 'resolved', resolution_outcome = 'confirmed', resolved_at = '2026-05-14'
   where id = '10000000-0000-0000-0000-000000000001';
 update mysteries set resolved_at = '2026-02-05', resolution_outcome = 'confirmed'
   where id = '10000000-0000-0000-0000-000000000002';
@@ -176,9 +176,102 @@ values
   ('Taylor Nation', 'Taylor Swift''s official fan-engagement team, known for running cryptic online activations, sending gifts to selected fans, and dropping hints ahead of major announcements. Operates the Taylor Nation LLC imprint.'),
   ('ISRC', 'International Standard Recording Code — a unique identifier permanently embedded in a recorded track. Fans track ISRC registrations to spot unreleased songs before they''re officially announced, since ISRCs must be registered with collecting societies before distribution.');
 
--- Patterns (includes lore entry for resolved Toy Story mystery)
+-- Patterns
 insert into patterns (text)
 values
   ('Taylor Swift announcements are consistently preceded by streaming-metadata anomalies on the 13th of the month. Across the last four album cycles, at least one ISRC registration or playlist edit linked to an unreleased project appeared on a 13th date between 3 and 6 weeks before the official announcement.'),
-  ('Physical-world sightings (venue appearances, merchandise changes, third-party collaborator meetings) lag behind digital signals by 2–6 weeks. This suggests Taylor''s team seeds digital breadcrumbs first, then allows in-person corroboration to surface organically through fan reporting.'),
-  ('RESOLVED — Taylor Swift × Toy Story 5: Confirmed on June 19, 2026, the Toy Story 5 premiere date. Taylor co-wrote and performed "You''ve Got a Friend in Me (Taylor''s Version)" for the film''s end credits. The ISRC metadata anomaly spotted on May 13 was the earliest verifiable signal — 37 days before the official announcement.');
+  ('Physical-world sightings (venue appearances, merchandise changes, third-party collaborator meetings) lag behind digital signals by 2–6 weeks. This suggests Taylor''s team seeds digital breadcrumbs first, then allows in-person corroboration to surface organically through fan reporting.');
+
+-- Lore archive
+insert into lore_archive (id, title, summary, resolution, resolved_at, clue_count)
+values
+  (
+    '40000000-0000-0000-0000-000000000001',
+    'Taylor Swift × Toy Story 5',
+    'Taylor Swift wrote and performed "Beyond the Clouds" for Toy Story 5. The mystery ran from early 2026 until the official announcement on May 14 2026. Key signals: repeated cloud imagery in social posts, streaming metadata changes on Spotify, the number 13 appearing in promotional materials, and a third-party confirmation from Pixar''s production notes.',
+    'confirmed',
+    '2026-05-14',
+    6
+  );
+
+-- Reputation (Taylor''s Version) mystery
+insert into mysteries (id, name, status, opened_at, resolves_at, clue_count, vote_count, agent_briefing)
+values
+  (
+    '10000000-0000-0000-0000-000000000004',
+    'Reputation (Taylor''s Version)',
+    'active',
+    '2026-05-15',
+    null,
+    4,
+    0,
+    'Reputation (Taylor''s Version) is the last remaining unrecorded album in Taylor''s re-recording project. With 1989 (Taylor''s Version) released in October 2023 and every prior album now rerecorded, Reputation TV is overdue. Swifties are tracking snake imagery, black and gold colour schemes in her outfits, and references to the "old Taylor" narrative. Current confidence: speculated.'
+  );
+
+-- Reputation TV clues
+insert into clues (
+  id, mystery_id, text, clue_types, status, spotted_at, linked_at,
+  source_type, source_name, is_retroactive, confidence_pct,
+  vote_count_real, vote_count_stretch
+)
+values
+  (
+    '20000000-0000-0000-0000-000000000007',
+    '10000000-0000-0000-0000-000000000004',
+    'Taylor wore all-black to the iHeart Radio Awards on May 19 with a snake bracelet and the number 13 embossed on her heel — first public snake reference since the Reputation era.',
+    array['outfit', 'numbers'],
+    'observed',
+    '2026-05-19',
+    '2026-05-19',
+    'reddit',
+    'r/TaylorSwift',
+    false,
+    62,
+    841,
+    312
+  ),
+  (
+    '20000000-0000-0000-0000-000000000008',
+    '10000000-0000-0000-0000-000000000004',
+    'The Spotify metadata for "Look What You Made Me Do" quietly changed its "recorded by" credit from "Taylor Swift" to "Taylor Swift (Original Recording)" — the same metadata pattern seen 3–4 months before each previous Taylor''s Version release.',
+    array['streaming-metadata'],
+    'speculated',
+    '2026-05-22',
+    '2026-05-22',
+    'streaming',
+    'Spotify',
+    false,
+    78,
+    1204,
+    187
+  ),
+  (
+    '20000000-0000-0000-0000-000000000009',
+    '10000000-0000-0000-0000-000000000004',
+    'Taylor''s May 25 Instagram post captioned "the old Taylor can''t come to the phone right now" — a direct lyric from "Look What You Made Me Do" — included a gold snake emoji in the comments, liked by Taylor Nation.',
+    array['social-caption'],
+    'speculated',
+    '2026-05-25',
+    '2026-05-25',
+    'other',
+    'Instagram',
+    false,
+    71,
+    2130,
+    410
+  ),
+  (
+    '20000000-0000-0000-0000-000000000010',
+    '10000000-0000-0000-0000-000000000004',
+    'Big Machine Records updated their website on May 28 to remove the original Reputation album from their active catalog page — consistent with the pattern seen before Fearless TV, Red TV, and 1989 TV releases when label licensing quietly shifts ahead of the Taylor''s Version drop.',
+    array['website', 'third-party'],
+    'corroborated',
+    '2026-05-28',
+    '2026-05-28',
+    'other',
+    'bigmachinelabelgroup.com',
+    false,
+    84,
+    3412,
+    201
+  );

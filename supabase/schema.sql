@@ -63,6 +63,16 @@ create table glossary_terms (
   definition text not null
 );
 
+create table lore_archive (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  summary text not null,
+  resolution text not null,
+  resolved_at timestamptz not null,
+  clue_count integer default 0,
+  created_at timestamptz default now()
+);
+
 -- Row Level Security
 alter table mysteries enable row level security;
 alter table clues enable row level security;
@@ -70,12 +80,14 @@ alter table connections enable row level security;
 alter table votes enable row level security;
 alter table patterns enable row level security;
 alter table glossary_terms enable row level security;
+alter table lore_archive enable row level security;
 
 create policy "public read mysteries" on mysteries for select using (true);
 create policy "public read clues" on clues for select using (true);
 create policy "public read connections" on connections for select using (true);
 create policy "public read patterns" on patterns for select using (true);
 create policy "public read glossary_terms" on glossary_terms for select using (true);
+create policy "public read lore_archive" on lore_archive for select using (true);
 create policy "public insert votes" on votes for insert with check (true);
 create policy "public read votes" on votes for select using (true);
 

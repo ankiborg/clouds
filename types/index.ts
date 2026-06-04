@@ -16,6 +16,7 @@ export type SourceType =
   | 'twitter'
   | 'instagram'
   | 'tiktok'
+  | 'reddit'
   | 'real-life'
   | 'streaming'
   | 'official-site'
@@ -69,4 +70,13 @@ export interface GlossaryTerm {
 export interface AgentPattern {
   id: string
   text: string
+}
+
+export interface LoreArchiveEntry {
+  id: string
+  title: string
+  summary: string
+  resolution: ResolutionOutcome
+  resolvedAt: Date
+  clueCount: number
 }

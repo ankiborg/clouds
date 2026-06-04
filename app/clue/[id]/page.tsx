@@ -1,11 +1,9 @@
 import Link from 'next/link'
-import { cookies } from 'next/headers'
 import { ArrowLeft, ExternalLink } from 'lucide-react'
 import {
   getClueById,
   getMysteryById,
   getConnectionsByClue,
-  getVoteForClue,
 } from '@/lib/supabase/queries'
 import { StatusBadge } from '@/components/StatusBadge'
 import { ClueTypeBadge } from '@/components/ClueTypeBadge'
@@ -35,17 +33,13 @@ export default async function CluePage({ params }: { params: { id: string } }) {
     )
   }
 
-  const [mystery, clueConnections, initialVotedAs] = await Promise.all([
+  const [mystery, clueConnections] = await Promise.all([
     clue.mysteryId ? getMysteryById(clue.mysteryId) : null,
     getConnectionsByClue(clue.id),
-    (async () => {
-      const voterId = cookies().get('sw_voter_id')?.value
-      return voterId ? getVoteForClue(voterId, clue.id) : null
-    })(),
   ])
 
   const connectedClues = await Promise.all(
-    clueConnections.map(async conn => {
+    clueConnections.map(async (conn) => {
       const otherId = conn.clueIdA === clue.id ? conn.clueIdB : conn.clueIdA
       const other = await getClueById(otherId)
       return { conn, other }
@@ -123,7 +117,7 @@ export default async function CluePage({ params }: { params: { id: string } }) {
         initialConfidencePct={clue.confidencePct}
         initialVoteCountReal={clue.voteCountReal}
         initialVoteCountStretch={clue.voteCountStretch}
-        initialVotedAs={initialVotedAs}
+        initialVotedAs={null}
       />
 
       {mystery && (
@@ -147,13 +141,17 @@ export default async function CluePage({ params }: { params: { id: string } }) {
         </div>
       )}
 
-      {connectedClues.length > 0 && (
-        <div className="mb-6">
-          <p className="text-xs font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mb-2">
-            Connected Clues
+      <div className="mb-6">
+        <p className="text-xs font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mb-2">
+          Connected Clues
+        </p>
+        {connectedClues.length === 0 ? (
+          <p className="text-sm text-zinc-400 dark:text-zinc-500 py-2">
+            No connections found yet — the pattern agent runs every 6 hours.
           </p>
+        ) : (
           <div className="space-y-3">
-            {connectedClues.map(({ conn, other }) =>
+            {connectedClues.map(({ conn, other }: { conn: import('@/types').Connection; other: import('@/types').Clue | null }) =>
               other ? (
                 <div
                   key={conn.id}
@@ -165,7 +163,7 @@ export default async function CluePage({ params }: { params: { id: string } }) {
                   >
                     <div className="flex flex-wrap items-center gap-1.5 mb-2">
                       <StatusBadge status={other.status} />
-                      {other.clueTypes.slice(0, 1).map(t => (
+                      {other.clueTypes.slice(0, 1).map((t) => (
                         <ClueTypeBadge key={t} type={t} />
                       ))}
                     </div>
@@ -180,8 +178,8 @@ export default async function CluePage({ params }: { params: { id: string } }) {
               ) : null
             )}
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }

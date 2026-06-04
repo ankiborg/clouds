@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { cookies } from 'next/headers'
-import { recordVote } from '@/lib/supabase/queries'
+import { createHash } from 'crypto'
+import { insertVote, incrementClueVote } from '@/lib/supabase/queries'
+
+function fingerprint(req: NextRequest): string {
+  const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim() ?? 'unknown'
+  const ua = req.headers.get('user-agent') ?? 'unknown'
+  return createHash('sha256').update(ip + ua).digest('hex')
+}
 
 export async function POST(request: NextRequest) {
   let body: { clue_id?: string; type?: string }
@@ -15,28 +21,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'clue_id and type (real|stretch) required' }, { status: 400 })
   }
 
-  const cookieStore = cookies()
-  let voterId = cookieStore.get('sw_voter_id')?.value
-  const isNewVoter = !voterId
-  if (isNewVoter) {
-    voterId = crypto.randomUUID()
+  const voterFingerprint = fingerprint(request)
+
+  const insertResult = await insertVote(clue_id, type, voterFingerprint)
+  if (insertResult === 'duplicate') {
+    return NextResponse.json({ error: 'already_voted' }, { status: 409 })
   }
 
-  const result = await recordVote(clue_id, type, voterId!)
-
-  const response = NextResponse.json(
-    result ?? { error: 'Vote failed' },
-    { status: result ? 200 : 500 }
-  )
-
-  if (isNewVoter && voterId) {
-    response.cookies.set('sw_voter_id', voterId, {
-      maxAge: 60 * 60 * 24 * 30,
-      sameSite: 'lax',
-      path: '/',
-      httpOnly: false,
-    })
-  }
-
-  return response
+  const counts = await incrementClueVote(clue_id, type)
+  return NextResponse.json(counts)
 }

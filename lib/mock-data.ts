@@ -1,4 +1,4 @@
-import type { Mystery, Clue, Connection, GlossaryTerm, AgentPattern } from '@/types'
+import type { Mystery, Clue, Connection, GlossaryTerm, AgentPattern, LoreArchiveEntry } from '@/types'
 
 export const mysteries: Mystery[] = [
   {
@@ -8,12 +8,12 @@ export const mysteries: Mystery[] = [
     status: 'resolved',
     openedAt: new Date('2026-04-01'),
     resolvesAt: new Date('2026-06-19'),
-    resolvedAt: new Date('2026-06-19'),
+    resolvedAt: new Date('2026-05-14'),
     resolutionOutcome: 'confirmed' as const,
     clueCount: 6,
     voteCount: 1982,
     agentBriefing:
-      'Three independent data streams are converging on the same conclusion: Taylor Swift has a creative role in Toy Story 5. A streaming-metadata anomaly on Disney+ lists an uncredited "Track 13" with an ISRC registered to Taylor Nation LLC — Taylor\'s own fan-engagement imprint. Cross-referencing with a verified sighting at the Academy Governors Ball (where Taylor was photographed alongside Pixar CCO Pete Docter) and a single-frame clapperboard reading "T.S.5" in the Eras Tour film re-release, this agent rates the probability of a formal collaboration at 74% and rising. Resolution is expected by the June 19 premiere date.',
+      'Confirmed: Taylor Swift wrote and performed "Beyond the Clouds" for Toy Story 5, officially announced May 14 2026. The number-13 clues, cloud imagery, and streaming metadata changes were all genuine signals. This mystery closes as fully corroborated — one of the cleaner resolutions in SwiftWatch history.',
   },
   {
     id: 'mystery-tortured',
@@ -40,6 +40,16 @@ export const mysteries: Mystery[] = [
     voteCount: 2103,
     agentBriefing:
       'The clues originated from a fan-made concept project that went viral. Taylor\'s team confirmed no feature film is in production.',
+  },
+  {
+    id: 'mystery-rep-tv',
+    name: 'Reputation (Taylor\'s Version)',
+    status: 'active',
+    openedAt: new Date('2026-05-15'),
+    clueCount: 4,
+    voteCount: 0,
+    agentBriefing:
+      'Reputation (Taylor\'s Version) is the last remaining unrecorded album in Taylor\'s re-recording project. With 1989 (Taylor\'s Version) released in October 2023 and every prior album now rerecorded, Reputation TV is overdue. Swifties are tracking snake imagery, black and gold colour schemes in her outfits, and references to the "old Taylor" narrative. Current confidence: speculated.',
   },
 ]
 
@@ -142,6 +152,70 @@ export const clues: Clue[] = [
     voteCountReal: 143,
     voteCountStretch: 133,
   },
+  {
+    id: 'clue-rep-snake-bracelet',
+    mysteryId: 'mystery-rep-tv',
+    text:
+      'Taylor wore all-black to the iHeart Radio Awards on May 19 with a snake bracelet and the number 13 embossed on her heel — first public snake reference since the Reputation era.',
+    clueTypes: ['outfit', 'numbers'],
+    status: 'observed',
+    spottedAt: new Date('2026-05-19'),
+    linkedAt: new Date('2026-05-19'),
+    sourceType: 'reddit',
+    sourceName: 'r/TaylorSwift',
+    isRetroactive: false,
+    confidencePct: 62,
+    voteCountReal: 841,
+    voteCountStretch: 312,
+  },
+  {
+    id: 'clue-rep-lwymmd-metadata',
+    mysteryId: 'mystery-rep-tv',
+    text:
+      'The Spotify metadata for "Look What You Made Me Do" quietly changed its "recorded by" credit from "Taylor Swift" to "Taylor Swift (Original Recording)" — the same metadata pattern seen 3–4 months before each previous Taylor\'s Version release.',
+    clueTypes: ['streaming-metadata'],
+    status: 'speculated',
+    spottedAt: new Date('2026-05-22'),
+    linkedAt: new Date('2026-05-22'),
+    sourceType: 'streaming',
+    sourceName: 'Spotify',
+    isRetroactive: false,
+    confidencePct: 78,
+    voteCountReal: 1204,
+    voteCountStretch: 187,
+  },
+  {
+    id: 'clue-rep-old-taylor-ig',
+    mysteryId: 'mystery-rep-tv',
+    text:
+      'Taylor\'s May 25 Instagram post captioned "the old Taylor can\'t come to the phone right now" — a direct lyric from "Look What You Made Me Do" — included a gold snake emoji in the comments, liked by Taylor Nation.',
+    clueTypes: ['social-caption'],
+    status: 'speculated',
+    spottedAt: new Date('2026-05-25'),
+    linkedAt: new Date('2026-05-25'),
+    sourceType: 'other',
+    sourceName: 'Instagram',
+    isRetroactive: false,
+    confidencePct: 71,
+    voteCountReal: 2130,
+    voteCountStretch: 410,
+  },
+  {
+    id: 'clue-rep-big-machine',
+    mysteryId: 'mystery-rep-tv',
+    text:
+      'Big Machine Records updated their website on May 28 to remove the original Reputation album from their active catalog page — consistent with the pattern seen before Fearless TV, Red TV, and 1989 TV releases when label licensing quietly shifts ahead of the Taylor\'s Version drop.',
+    clueTypes: ['website', 'third-party'],
+    status: 'corroborated',
+    spottedAt: new Date('2026-05-28'),
+    linkedAt: new Date('2026-05-28'),
+    sourceType: 'other',
+    sourceName: 'bigmachinelabelgroup.com',
+    isRetroactive: false,
+    confidencePct: 84,
+    voteCountReal: 3412,
+    voteCountStretch: 201,
+  },
 ]
 
 export const connections: Connection[] = [
@@ -191,5 +265,17 @@ export const agentPatterns: AgentPattern[] = [
     id: 'pattern-2',
     text:
       'Physical-world sightings (venue appearances, merchandise changes, third-party collaborator meetings) lag behind digital signals by 2–6 weeks. This suggests Taylor\'s team seeds digital breadcrumbs first, then allows in-person corroboration to surface organically through fan reporting.',
+  },
+]
+
+export const loreArchive: LoreArchiveEntry[] = [
+  {
+    id: 'lore-ts5',
+    title: 'Taylor Swift × Toy Story 5',
+    summary:
+      'Taylor Swift wrote and performed "Beyond the Clouds" for Toy Story 5. The mystery ran from early 2026 until the official announcement on May 14 2026. Key signals: repeated cloud imagery in social posts, streaming metadata changes on Spotify, the number 13 appearing in promotional materials, and a third-party confirmation from Pixar\'s production notes.',
+    resolution: 'confirmed',
+    resolvedAt: new Date('2026-05-14'),
+    clueCount: 6,
   },
 ]

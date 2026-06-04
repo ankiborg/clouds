@@ -14,6 +14,17 @@ export async function getActiveMystery(): Promise<Mystery | null> {
   return mapMystery(data)
 }
 
+export async function getActiveMysteries(): Promise<Mystery[]> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('mysteries')
+    .select('*')
+    .eq('status', 'active')
+    .order('opened_at', { ascending: false })
+  if (error || !data) return []
+  return data.map(mapMystery)
+}
+
 export async function getMysteryById(id: string): Promise<Mystery | null> {
   const supabase = createClient()
   const { data, error } = await supabase
@@ -80,6 +91,8 @@ export async function getConnectionsByClue(clueId: string): Promise<Connection[]
     .from('connections')
     .select('*')
     .or(`clue_id_a.eq.${clueId},clue_id_b.eq.${clueId}`)
+    .order('strength_score', { ascending: false })
+    .limit(5)
   if (error || !data) return []
   return data.map(mapConnection)
 }
@@ -91,7 +104,11 @@ export async function getResolvedMysteries(): Promise<Mystery[]> {
     .select('*')
     .eq('status', 'resolved')
     .order('resolved_at', { ascending: false })
-  if (error || !data) return []
+  if (error) {
+    console.error('[getResolvedMysteries]', error.message, error.code)
+    return []
+  }
+  if (!data) return []
   return data.map(mapMystery)
 }
 
@@ -110,21 +127,6 @@ export async function getGlossaryTerms(): Promise<GlossaryTerm[]> {
   const { data, error } = await supabase.from('glossary_terms').select('*')
   if (error || !data) return []
   return data.map(mapGlossaryTerm)
-}
-
-export async function getVoteForClue(
-  voterId: string,
-  clueId: string
-): Promise<'real' | 'stretch' | null> {
-  const supabase = createClient()
-  const { data, error } = await supabase
-    .from('votes')
-    .select('type')
-    .eq('clue_id', clueId)
-    .eq('voter_id', voterId)
-    .maybeSingle()
-  if (error || !data) return null
-  return data.type as 'real' | 'stretch'
 }
 
 export async function getRecentClues(limit = 50): Promise<Clue[]> {
@@ -162,21 +164,60 @@ export async function getPatternClusters(): Promise<{ count: number }> {
   return { count }
 }
 
-export async function recordVote(
+export async function insertVote(
   clueId: string,
-  type: 'real' | 'stretch',
-  voterId: string
-): Promise<{ confidencePct: number; voteCountReal: number; voteCountStretch: number } | null> {
+  voteType: 'real' | 'stretch',
+  voterFingerprint: string
+): Promise<'ok' | 'duplicate'> {
   const supabase = createClient()
-  const { data, error } = await supabase.rpc('record_vote', {
-    p_clue_id: clueId,
-    p_type: type,
-    p_voter_id: voterId,
-  })
-  if (error || !data?.[0]) return null
-  return {
-    confidencePct: data[0].confidence_pct,
-    voteCountReal: data[0].vote_count_real,
-    voteCountStretch: data[0].vote_count_stretch,
+  const { error } = await supabase
+    .from('votes')
+    .insert({ clue_id: clueId, vote_type: voteType, voter_fingerprint: voterFingerprint })
+  if (error) {
+    // unique constraint violation = duplicate vote
+    if (error.code === '23505') return 'duplicate'
+    throw error
   }
+  return 'ok'
+}
+
+export async function incrementClueVote(
+  clueId: string,
+  voteType: 'real' | 'stretch'
+): Promise<{ confidencePct: number; voteCountReal: number; voteCountStretch: number }> {
+  const supabase = createClient()
+
+  const field = voteType === 'real' ? 'vote_count_real' : 'vote_count_stretch'
+
+  // Read current counts
+  const { data: current } = await supabase
+    .from('clues')
+    .select('vote_count_real, vote_count_stretch, status')
+    .eq('id', clueId)
+    .single()
+
+  const real = (current?.vote_count_real ?? 0) + (voteType === 'real' ? 1 : 0)
+  const stretch = (current?.vote_count_stretch ?? 0) + (voteType === 'stretch' ? 1 : 0)
+  const total = real + stretch
+  const confidencePct = total > 0 ? Math.round((real / total) * 100) : 50
+
+  const shouldPromote =
+    current?.status === 'speculated' &&
+    confidencePct >= 75 &&
+    total >= 10
+
+  await supabase
+    .from('clues')
+    .update({
+      [field]: voteType === 'real' ? real : stretch,
+      confidence_pct: confidencePct,
+      ...(shouldPromote ? { status: 'corroborated' } : {}),
+    })
+    .eq('id', clueId)
+
+  if (shouldPromote) {
+    console.log(`[VOTE] Clue ${clueId} promoted to corroborated (confidence: ${confidencePct}%, votes: ${total})`)
+  }
+
+  return { confidencePct, voteCountReal: real, voteCountStretch: stretch }
 }
