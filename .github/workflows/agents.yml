@@ -13,8 +13,8 @@ jobs:
     steps:
       - name: Trigger harvest agent
         run: |
-          curl -sf -X POST "${{ secrets.VERCEL_APP_URL }}/api/agents/harvest" \
-            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"
+          curl -v -X POST "${{ secrets.VERCEL_APP_URL }}/api/agents/harvest" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" || true
 
   patterns:
     if: github.event_name == 'workflow_dispatch' || contains(github.event.schedule, '0 */6')
@@ -22,5 +22,5 @@ jobs:
     steps:
       - name: Trigger pattern agent
         run: |
-          curl -sf -X POST "${{ secrets.VERCEL_APP_URL }}/api/agents/patterns" \
-            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"
+          curl -v -X POST "${{ secrets.VERCEL_APP_URL }}/api/agents/patterns" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" || true
