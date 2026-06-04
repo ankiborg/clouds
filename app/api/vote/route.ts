@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createHash } from 'crypto'
-import { insertVote, incrementClueVote } from '@/lib/supabase/queries'
+import { createClient } from '@/lib/supabase/server'
 
 function fingerprint(req: NextRequest): string {
   const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim() ?? 'unknown'
@@ -21,13 +21,26 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'clue_id and type (real|stretch) required' }, { status: 400 })
   }
 
-  const voterFingerprint = fingerprint(request)
+  const supabase = createClient()
+  const { data, error } = await supabase.rpc('increment_vote', {
+    p_clue_id: clue_id,
+    p_vote_type: type,
+    p_voter_fingerprint: fingerprint(request),
+  })
 
-  const insertResult = await insertVote(clue_id, type, voterFingerprint)
-  if (insertResult === 'duplicate') {
+  if (error || !data?.[0]) {
+    console.error('[vote]', error?.message)
+    return NextResponse.json({ error: 'Vote failed' }, { status: 500 })
+  }
+
+  const row = data[0]
+  if (row.was_duplicate) {
     return NextResponse.json({ error: 'already_voted' }, { status: 409 })
   }
 
-  const counts = await incrementClueVote(clue_id, type)
-  return NextResponse.json(counts)
+  return NextResponse.json({
+    confidencePct: row.confidence_pct,
+    voteCountReal: row.vote_count_real,
+    voteCountStretch: row.vote_count_stretch,
+  })
 }
