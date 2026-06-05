@@ -258,23 +258,33 @@ export const glossaryTerms: GlossaryTerm[] = [
 export const agentPatterns: AgentPattern[] = [
   {
     id: 'pattern-1',
-    text:
+    name: 'Streaming metadata leads announcements',
+    description:
       'Taylor Swift announcements are consistently preceded by streaming-metadata anomalies on the 13th of the month. Across the last four album cycles, at least one ISRC registration or playlist edit linked to an unreleased project appeared on a 13th date between 3 and 6 weeks before the official announcement.',
+    derivedFromMysteryIds: [],
+    confidence: 'established',
+    exampleCount: 1,
   },
   {
     id: 'pattern-2',
-    text:
+    name: 'Digital signals precede physical corroboration',
+    description:
       'Physical-world sightings (venue appearances, merchandise changes, third-party collaborator meetings) lag behind digital signals by 2–6 weeks. This suggests Taylor\'s team seeds digital breadcrumbs first, then allows in-person corroboration to surface organically through fan reporting.',
+    derivedFromMysteryIds: [],
+    confidence: 'established',
+    exampleCount: 1,
   },
 ]
 
 export const loreArchive: LoreArchiveEntry[] = [
   {
     id: 'lore-ts5',
+    mysteryId: '10000000-0000-0000-0000-000000000001',
     title: 'Taylor Swift × Toy Story 5',
     summary:
       'Taylor Swift wrote and performed "Beyond the Clouds" for Toy Story 5. The mystery ran from early 2026 until the official announcement on May 14 2026. Key signals: repeated cloud imagery in social posts, streaming metadata changes on Spotify, the number 13 appearing in promotional materials, and a third-party confirmation from Pixar\'s production notes.',
-    resolution: 'confirmed',
+    fullWriteup: '',
+    resolutionOutcome: 'confirmed',
     resolvedAt: new Date('2026-05-14'),
     clueCount: 6,
   },
