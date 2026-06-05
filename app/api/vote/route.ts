@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
   }
 
   const supabase = createClient()
-  const { data, error } = await supabase.rpc('increment_vote', {
+  const { data, error } = await supabase.rpc('cast_vote', {
     p_clue_id: clue_id,
     p_vote_type: type,
     p_voter_fingerprint: fingerprint(request),
@@ -30,17 +30,14 @@ export async function POST(request: NextRequest) {
 
   if (error || !data?.[0]) {
     console.error('[vote]', error?.message)
-    return NextResponse.json({ error: 'Vote failed' }, { status: 500 })
+    return NextResponse.json({ error: 'vote_failed' }, { status: 500 })
   }
 
   const row = data[0]
-  if (row.was_duplicate) {
-    return NextResponse.json({ error: 'already_voted' }, { status: 409 })
-  }
-
   return NextResponse.json({
-    confidencePct: row.confidence_pct,
     voteCountReal: row.vote_count_real,
     voteCountStretch: row.vote_count_stretch,
+    status: row.status,
+    currentVote: row.current_vote ?? null,
   })
 }

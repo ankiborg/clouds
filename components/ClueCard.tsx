@@ -26,26 +26,36 @@ interface ClueCardProps {
 
 export function ClueCard({ clue, initialVotedAs = null }: ClueCardProps) {
   const [votes, setVotes] = useState({
-    real: clue.voteCountReal,
-    stretch: clue.voteCountStretch,
+    real: clue.voteCountReal ?? 0,
+    stretch: clue.voteCountStretch ?? 0,
   })
-  const [confidencePct, setConfidencePct] = useState(clue.confidencePct)
+  const [status, setStatus] = useState(clue.status)
   const [voted, setVoted] = useState<'real' | 'stretch' | null>(initialVotedAs)
   const [loading, setLoading] = useState(false)
 
-  const pct = confidencePct
+  const pct = votes.real + votes.stretch > 0
+    ? Math.round((votes.real / (votes.real + votes.stretch)) * 100)
+    : 0
 
   const handleVote = async (type: 'real' | 'stretch', e: React.MouseEvent) => {
     e.preventDefault()
-    if (voted || loading) return
+    if (loading) return
 
-    const prev = { votes: { ...votes }, confidencePct, voted }
-    const newVotes = { ...votes, [type]: votes[type] + 1 }
-    const newTotal = newVotes.real + newVotes.stretch
-    const newPct = newTotal > 0 ? Math.round((newVotes.real / newTotal) * 100) : 50
+    const prev = { votes: { ...votes }, voted }
+    const newVotes = { ...votes }
+    let newVoted: 'real' | 'stretch' | null
+
+    if (voted === type) {
+      newVotes[type] = Math.max(0, votes[type] - 1)
+      newVoted = null
+    } else {
+      if (voted !== null) newVotes[voted] = Math.max(0, votes[voted] - 1)
+      newVotes[type] = votes[type] + 1
+      newVoted = type
+    }
+
     setVotes(newVotes)
-    setConfidencePct(newPct)
-    setVoted(type)
+    setVoted(newVoted)
     setLoading(true)
 
     try {
@@ -56,18 +66,15 @@ export function ClueCard({ clue, initialVotedAs = null }: ClueCardProps) {
       })
       if (res.ok) {
         const data = await res.json()
-        if (data.confidencePct !== undefined) {
-          setConfidencePct(data.confidencePct)
-          setVotes({ real: data.voteCountReal, stretch: data.voteCountStretch })
-        }
+        setVotes({ real: data.voteCountReal, stretch: data.voteCountStretch })
+        setVoted(data.currentVote ?? null)
+        if (data.status) setStatus(data.status)
       } else {
         setVotes(prev.votes)
-        setConfidencePct(prev.confidencePct)
         setVoted(prev.voted)
       }
     } catch {
       setVotes(prev.votes)
-      setConfidencePct(prev.confidencePct)
       setVoted(prev.voted)
     } finally {
       setLoading(false)
@@ -79,7 +86,7 @@ export function ClueCard({ clue, initialVotedAs = null }: ClueCardProps) {
       <Link href={`/clue/${clue.id}`} className="block p-4">
         <div className="flex items-start justify-between gap-2 mb-3">
           <div className="flex flex-wrap items-center gap-1.5 min-w-0">
-            <StatusBadge status={clue.status} />
+            <StatusBadge status={status} />
             {clue.clueTypes.slice(0, 2).map(t => (
               <ClueTypeBadge key={t} type={t} />
             ))}
@@ -109,7 +116,7 @@ export function ClueCard({ clue, initialVotedAs = null }: ClueCardProps) {
             variant="outline"
             size="sm"
             onClick={e => handleVote('real', e)}
-            disabled={!!voted || loading}
+            disabled={loading}
             className={
               voted === 'real'
                 ? 'border-[#7F77DD] text-[#7F77DD] dark:border-[#7F77DD] dark:text-[#7F77DD]'
@@ -123,7 +130,7 @@ export function ClueCard({ clue, initialVotedAs = null }: ClueCardProps) {
             variant="outline"
             size="sm"
             onClick={e => handleVote('stretch', e)}
-            disabled={!!voted || loading}
+            disabled={loading}
             className={
               voted === 'stretch'
                 ? 'border-zinc-400 text-zinc-500 dark:border-zinc-500'
