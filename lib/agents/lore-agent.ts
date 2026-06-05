@@ -172,7 +172,7 @@ Respond with this JSON schema:
       .maybeSingle()
 
     if (existing) {
-      const newIds = [...new Set([...existing.derived_from_mystery_ids, mysteryId])]
+      const newIds = Array.from(new Set([...existing.derived_from_mystery_ids, mysteryId]))
       await supabase.from('patterns').update({
         description: pattern.description,
         confidence: pattern.confidence,
