@@ -3,4 +3,5 @@ export const logger = {
   classify: (msg: string) => console.log(`[CLASSIFY ${new Date().toISOString()}] ${msg}`),
   pattern: (msg: string) => console.log(`[PATTERN ${new Date().toISOString()}] ${msg}`),
   submit: (msg: string) => console.log(`[SUBMIT ${new Date().toISOString()}] ${msg}`),
+  lore: (msg: string) => console.log(`[LORE ${new Date().toISOString()}] ${msg}`),
 }

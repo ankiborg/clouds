@@ -1,12 +1,20 @@
-import { getResolvedMysteries, getPatterns, getGlossaryTerms } from '@/lib/supabase/queries'
+import { getLoreEntries, getResolvedMysteries, getPatterns, getGlossaryTerms } from '@/lib/supabase/queries'
 import { LoreSearchClient } from '@/components/LoreSearchClient'
+import { LoreArchiveClient } from '@/components/LoreArchiveClient'
 
 export default async function LorePage() {
-  const [resolvedMysteries, patterns, glossaryTerms] = await Promise.all([
+  const [loreEntries, resolvedMysteries, patterns, glossaryTerms] = await Promise.all([
+    getLoreEntries(),
     getResolvedMysteries(),
     getPatterns(),
     getGlossaryTerms(),
   ])
+
+  const confidenceBadge: Record<string, { label: string; className: string }> = {
+    emerging: { label: 'Emerging', className: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' },
+    established: { label: 'Established', className: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
+    proven: { label: 'Proven', className: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' },
+  }
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
@@ -48,23 +56,45 @@ export default async function LorePage() {
         </div>
       </details>
 
-      {/* Resolved mysteries — searchable, client */}
-      <LoreSearchClient mysteries={resolvedMysteries} />
+      {/* Resolved mysteries — lore archive if available, fallback to raw mysteries */}
+      {loreEntries.length > 0
+        ? <LoreArchiveClient entries={loreEntries} />
+        : <LoreSearchClient mysteries={resolvedMysteries} />
+      }
 
-      {/* Agent-derived patterns — server-rendered, static */}
+      {/* Agent-derived patterns */}
       <div>
         <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mb-4">
           Agent-Derived Patterns
         </h2>
-        <div className="space-y-3">
-          {patterns.map(pattern => (
-            <blockquote key={pattern.id} className="border-l-4 border-[#AFA9EC] pl-4 py-1">
-              <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                {pattern.text}
-              </p>
-            </blockquote>
-          ))}
-        </div>
+        {patterns.length === 0 ? (
+          <p className="text-sm text-zinc-400 dark:text-zinc-500 py-4">
+            Patterns emerge as more mysteries resolve. Check back after the first confirmed resolution.
+          </p>
+        ) : (
+          <div className="space-y-4">
+            {patterns.map(pattern => (
+              <div key={pattern.id} className="border-l-4 border-[#AFA9EC] pl-4 py-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">
+                    {pattern.name}
+                  </p>
+                  {confidenceBadge[pattern.confidence] && (
+                    <span className={`inline-flex h-4 items-center rounded-full px-2 text-xs font-medium ${confidenceBadge[pattern.confidence].className}`}>
+                      {confidenceBadge[pattern.confidence].label}
+                    </span>
+                  )}
+                  <span className="text-xs text-zinc-400 dark:text-zinc-500">
+                    seen in {pattern.exampleCount} {pattern.exampleCount === 1 ? 'mystery' : 'mysteries'}
+                  </span>
+                </div>
+                <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                  {pattern.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )

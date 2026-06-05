@@ -69,14 +69,23 @@ export interface GlossaryTerm {
 
 export interface AgentPattern {
   id: string
-  text: string
+  name: string
+  description: string
+  derivedFromMysteryIds: string[]
+  confidence: 'emerging' | 'established' | 'proven'
+  exampleCount: number
 }
 
 export interface LoreArchiveEntry {
   id: string
+  mysteryId: string
   title: string
   summary: string
-  resolution: ResolutionOutcome
+  fullWriteup: string
+  whatCommunityGotRight?: string
+  whatCommunityGotWrong?: string
+  resolutionOutcome: ResolutionOutcome
   resolvedAt: Date
   clueCount: number
+  reopenedAt?: Date
 }

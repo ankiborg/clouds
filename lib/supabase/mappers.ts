@@ -1,4 +1,4 @@
-import type { Mystery, Clue, Connection, GlossaryTerm, AgentPattern } from '@/types'
+import type { Mystery, Clue, Connection, GlossaryTerm, AgentPattern, LoreArchiveEntry } from '@/types'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Row = Record<string, any>
@@ -54,5 +54,28 @@ export function mapGlossaryTerm(row: Row): GlossaryTerm {
 }
 
 export function mapPattern(row: Row): AgentPattern {
-  return { id: row.id, text: row.text }
+  return {
+    id: row.id,
+    name: row.name,
+    description: row.description,
+    derivedFromMysteryIds: row.derived_from_mystery_ids ?? [],
+    confidence: row.confidence,
+    exampleCount: row.example_count,
+  }
+}
+
+export function mapLoreEntry(row: Row): LoreArchiveEntry {
+  return {
+    id: row.id,
+    mysteryId: row.mystery_id,
+    title: row.title,
+    summary: row.summary,
+    fullWriteup: row.full_writeup ?? '',
+    whatCommunityGotRight: row.what_community_got_right ?? undefined,
+    whatCommunityGotWrong: row.what_community_got_wrong ?? undefined,
+    resolutionOutcome: row.resolution_outcome,
+    resolvedAt: new Date(row.resolved_at),
+    clueCount: row.clue_count,
+    reopenedAt: row.reopened_at ? new Date(row.reopened_at) : undefined,
+  }
 }

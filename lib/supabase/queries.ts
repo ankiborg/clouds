@@ -1,6 +1,6 @@
 import { createClient } from './server'
-import { mapMystery, mapClue, mapConnection, mapGlossaryTerm, mapPattern } from './mappers'
-import type { Mystery, Clue, Connection, GlossaryTerm, AgentPattern } from '@/types'
+import { mapMystery, mapClue, mapConnection, mapGlossaryTerm, mapPattern, mapLoreEntry } from './mappers'
+import type { Mystery, Clue, Connection, GlossaryTerm, AgentPattern, LoreArchiveEntry } from '@/types'
 
 export async function getActiveMystery(): Promise<Mystery | null> {
   const supabase = createClient()
@@ -110,6 +110,27 @@ export async function getResolvedMysteries(): Promise<Mystery[]> {
   }
   if (!data) return []
   return data.map(mapMystery)
+}
+
+export async function getLoreEntries(): Promise<LoreArchiveEntry[]> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('lore_archive')
+    .select('*')
+    .order('resolved_at', { ascending: false })
+  if (error || !data) return []
+  return data.map(mapLoreEntry)
+}
+
+export async function getLoreEntryByMystery(mysteryId: string): Promise<LoreArchiveEntry | null> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('lore_archive')
+    .select('*')
+    .eq('mystery_id', mysteryId)
+    .maybeSingle()
+  if (error || !data) return null
+  return mapLoreEntry(data)
 }
 
 export async function getPatterns(): Promise<AgentPattern[]> {

@@ -10,6 +10,7 @@
     "db:migrate": "npx tsx scripts/migrate.ts",
     "db:migrate-003": "npx tsx scripts/migrate.ts supabase/migrations/003_pattern_submission.sql",
     "db:migrate-004": "npx tsx scripts/migrate.ts supabase/migrations/004_increment_vote_fn.sql",
+    "db:migrate-005": "npx tsx scripts/migrate.ts supabase/migrations/005_lore.sql",
     "db:seed-update": "npx tsx scripts/seed-update.ts",
     "agents:run": "npx tsx scripts/run-agents.ts"
   },

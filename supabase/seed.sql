@@ -176,23 +176,25 @@ values
   ('Taylor Nation', 'Taylor Swift''s official fan-engagement team, known for running cryptic online activations, sending gifts to selected fans, and dropping hints ahead of major announcements. Operates the Taylor Nation LLC imprint.'),
   ('ISRC', 'International Standard Recording Code — a unique identifier permanently embedded in a recorded track. Fans track ISRC registrations to spot unreleased songs before they''re officially announced, since ISRCs must be registered with collecting societies before distribution.');
 
--- Patterns
-insert into patterns (text)
-values
-  ('Taylor Swift announcements are consistently preceded by streaming-metadata anomalies on the 13th of the month. Across the last four album cycles, at least one ISRC registration or playlist edit linked to an unreleased project appeared on a 13th date between 3 and 6 weeks before the official announcement.'),
-  ('Physical-world sightings (venue appearances, merchandise changes, third-party collaborator meetings) lag behind digital signals by 2–6 weeks. This suggests Taylor''s team seeds digital breadcrumbs first, then allows in-person corroboration to surface organically through fan reporting.');
-
--- Lore archive
-insert into lore_archive (id, title, summary, resolution, resolved_at, clue_count)
+-- Patterns (seed with two illustrative entries; lore agent will add more on first resolve)
+insert into patterns (name, description, confidence, example_count, derived_from_mystery_ids)
 values
   (
-    '40000000-0000-0000-0000-000000000001',
-    'Taylor Swift × Toy Story 5',
-    'Taylor Swift wrote and performed "Beyond the Clouds" for Toy Story 5. The mystery ran from early 2026 until the official announcement on May 14 2026. Key signals: repeated cloud imagery in social posts, streaming metadata changes on Spotify, the number 13 appearing in promotional materials, and a third-party confirmation from Pixar''s production notes.',
-    'confirmed',
-    '2026-05-14',
-    6
+    'Streaming metadata leads announcements',
+    'Taylor Swift announcements are consistently preceded by streaming-metadata anomalies on the 13th of the month. At least one ISRC registration or playlist edit linked to an unreleased project appeared on a 13th date between 3 and 6 weeks before the official announcement.',
+    'established',
+    1,
+    '{}'
+  ),
+  (
+    'Digital signals precede physical corroboration',
+    'Physical-world sightings (venue appearances, merchandise changes, third-party collaborator meetings) lag behind digital signals by 2–6 weeks. Taylor''s team seeds digital breadcrumbs first, then allows in-person corroboration to surface organically.',
+    'established',
+    1,
+    '{}'
   );
+
+-- Lore archive is intentionally empty — the lore agent populates it on first mystery resolve.
 
 -- Reputation (Taylor''s Version) mystery
 insert into mysteries (id, name, status, opened_at, resolves_at, clue_count, vote_count, agent_briefing)
